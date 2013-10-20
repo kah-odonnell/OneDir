@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Register for OneDir{% endblock %}
+
+{% block content %}
+    <p>Register</p>
+    <form action="/register/" method="post">
+    	{% csrf_token %}
+    	<input type="text" name="username">
+    	<input type="password" name="password">
+    	<input type="password" name="confirmpw">
+    	<input type="submit" value="Submit">
+    </form>
+{% endblock %}
