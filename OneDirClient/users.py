@@ -1,7 +1,7 @@
 import urllib2
 import urllib
 
-def makeUser():
+def makeUser(url):
 	username = raw_input("Username: ")
 	password = raw_input("Password: ")
 	confirmpw = raw_input("Confirm Password: ")
@@ -15,4 +15,4 @@ def makeUser():
 
 if __name__ == "__main__":
 	url = "http://localhost:8000/register/"
-	print makeUser()
+	print makeUser(url)
