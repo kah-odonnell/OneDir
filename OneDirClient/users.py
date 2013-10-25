@@ -1,18 +1,48 @@
-import urllib2
-import urllib
+import urllib, urllib2
+import cookielib
+from address import ROOT_ADDRESS
 
-def makeUser(url):
-	username = raw_input("Username: ")
-	password = raw_input("Password: ")
-	confirmpw = raw_input("Confirm Password: ")
-	userinfo = {"username": username, "password": password, "confirmpw":confirmpw}
-	data = urllib.urlencode(userinfo)
-	try:
-		response = urllib2.urlopen(url, data)
-		return response.read()
-	except urllib2.URLError:
-		return "Didn't work"
+cj = cookielib.CookieJar()
+opener = urllib2.build_opener(
+    urllib2.HTTPCookieProcessor(cj), 
+    urllib2.HTTPHandler(debuglevel=1)
+)
+token = None
 
-if __name__ == "__main__":
-	url = "http://localhost:8000/register/"
-	print makeUser(url)
+def get_token():
+    login_form = opener.open(ROOT_ADDRESS + "forms/login").read()
+    if token is None:
+        try:
+            token = [x.value for x in cj if x.name == 'csrftoken'][0]
+        except IndexError:
+            token = None
+    return token
+
+def login(username, password):
+    csrftoken = get_token()
+    values = {
+        'username': username,
+        'password': password,
+        'csrfmiddlewaretoken': csrftoken,
+    }
+    params = urllib.urlencode(values)
+    login_page = opener.open(ROOT_ADDRESS + "login/", params).read()
+    return login_page
+
+def register(username, password, confirmpw):
+    csrftoken = get_token()
+    if password != confirmpw:
+        return "Passwords do not match!"
+    values = {
+        'username': username,
+        'password': password,
+        'confirmpw': confirmpw,
+        'csrfmiddlewaretoken': csrftoken
+    }
+    params = urllib.urlencode(values)
+    register_page = opener.open(ROOT_ADDRESS + "register/", params).read()
+    return register_page
+
+def index():
+    index_page = opener.open(ROOT_ADDRESS).read()
+    return index_page
