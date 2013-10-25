@@ -10,7 +10,7 @@ opener = urllib2.build_opener(
 token = None
 
 def get_token():
-	global token
+    global token
     login_form = opener.open(ROOT_ADDRESS + "forms/login").read()
     if token is None:
         try:
