@@ -20,5 +20,9 @@ urlpatterns = patterns('',
     url(r'^register/', views.register_user),
     url(r'^forms/register/', views.register_form),
     url(r'^forms/login/', views.login_form),
-    url(r'^admin/', include(admin.site.urls))
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^add/', views.add_file),
+    url(r'^users/', views.get_users),
+    url(r'^get/', views.get_file),
+    url(r'^activity/', views.get_activity)
 )
