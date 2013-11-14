@@ -78,20 +78,32 @@ def add_file(request):
 	if not request.user.is_authenticated():
 		return HttpResponse("Must be logged in to upload files!")
 	if request.method == 'POST':
-		new_file = request.FILES['file']
-		filename = request.POST['filename']
 		path = "../uploads/" + str(request.user.id) + "/" + request.POST['path']
-		full_path = path + filename
+		#Attempt to create directory
 		try:
 			os.makedirs(path)
 		except:
 			pass
-		cfile = open(full_path, "wb+")
-		for chunk in new_file.chunks():
-			cfile.write(chunk)
-		cfile.close()
-		action = UserAction(user=request.user, action="add", path=request.POST['path'] + filename )
-		action.save()
+		#If a file is uploaded, write to a new file
+		if request.POST.get('file'):
+			new_file = request.FILES['file']
+			filename = request.POST['filename']
+			path = "../uploads/" + str(request.user.id) + "/" + request.POST['path']
+			full_path = path + filename
+			try:
+				os.makedirs(path)
+			except:
+				pass
+			cfile = open(full_path, "wb+")
+			for chunk in new_file.chunks():
+				cfile.write(chunk)
+			cfile.close()
+			action = UserAction(user=request.user, action="add", path=request.POST['path'] + filename )
+			action.save()
+		#Otherwise, we've already created a directory
+		else:
+			action = UserAction(user=request.user, action="add", path=request.POST['path'])
+			action.save()
 		return HttpResponse("Great success!")
 	return HttpResponse("Failed to upload anything.")
 

@@ -2,6 +2,7 @@ import urllib, urllib2, MultipartPostHandler
 import cookielib
 from address import ROOT_ADDRESS
 from poster.encode import multipart_encode
+from datetime import datetime
 
 #Build an opener that passes a session cookie with each HTML request
 cj = cookielib.CookieJar()
@@ -99,7 +100,7 @@ def add_file(file_path):
     Attempts to upload a designated file to the server
 
     Args:
-        file_path - (string) path of desired file relative to the location of this python file
+        file_path - (string) path of desired file/folder relative to the location of this python file
 
     Returns:
         (string) server's response
@@ -108,66 +109,82 @@ def add_file(file_path):
         (string) Error finding <filepath>
     """
     csrftoken = get_token()
-    try:
-        f = open(file_path, "rb")
-    except IOError:
-        return "Error finding %s" % file_path
-    #split directory into a list
-    directory_list = file_path.split('/')
-    #grab file name from last element
-    filename = directory_list[len(directory_list)-1]
-    #build path name from every other element
-    file_path = "/".join(directory_list[0:len(directory_list)-1]) + "/"
-    params = {
-        "filename": filename,
-        "path": file_path,
-        "file": f,
-        "csrfmiddlewaretoken": csrftoken
-    }
+    #If file_path ends in a slash, it's a directory
+    if file_path[len(file_path)-1] == "/":
+        params = {
+            "path": file_path,
+            "csrfmiddlewaretoken": csrftoken
+        }
+    #Otherwise, it's a new file
+    else:
+        try:
+            f = open(file_path, "rb")
+        except IOError:
+            return "Error finding %s" % file_path
+        #split directory into a list
+        directory_list = file_path.split('/')
+        #grab file name from last element
+        filename = directory_list[len(directory_list)-1]
+        #build path name from every other element
+        file_path = "/".join(directory_list[0:len(directory_list)-1]) + "/"
+        params = {
+            "filename": filename,
+            "path": file_path,
+            "file": f,
+            "csrfmiddlewaretoken": csrftoken
+        }
+        f.close()
     file_page = opener.open(ROOT_ADDRESS + "add/", params).read()
-    f.close()
     return file_page
 
 def get_file(file_path):
     """
     Downloads a file from the server at a path relative to that user's folder on the server.
-    Saves in the designated folder
+    Saves in the designated folder.
+        or
+    Creates a new folder without contacting the server. 
 
     Args:
         file_path - (string) path of desired file, relative to user's fodler
 
     Returns:
-        (string) server's response
-            Logged in as <username>
-            User <username> does not exist
-        (string) Error finding <filepath>
+        (string) File at <file_path> downloaded
+        or
+        (string) Error message from the server
     """
     csrftoken = get_token()
-    full_path = file_path
-    #split directory into a list
-    directory_list = file_path.split('/')
-    #grab file name from last element
-    filename = directory_list[len(directory_list)-1]
-    #build path name from every other element
-    file_path = "/".join(directory_list[0:len(directory_list)-1]) + "/"
-    params = {
-        "filename": filename,
-        "path": file_path,
-        "csrfmiddlewaretoken": csrftoken
-    }
-    server_response = opener.open(ROOT_ADDRESS + "get/", params).read()
-    errors = ["File not found!","Must be logged in to download files!"]
-    if server_response not in errors:
+    if file_path[len(file_path)-1] == "/":
         try:
-            os.makedirs(filepath)
+            os.makedirs(file_path)
         except:
             pass
-        cfile = open(full_path, "wb+")
-        cfile.write(file_page)
-        cfile.close()
-        return "File at %s downloaded" % full_path
-    else:
-        return server_response
+        return "New folder created."
+    else: 
+        full_path = file_path
+        #split directory into a list
+        directory_list = file_path.split('/')
+        #grab file name from last element
+        filename = directory_list[len(directory_list)-1]
+        #build path name from every other element
+        file_path = "/".join(directory_list[0:len(directory_list)-1]) + "/"
+        params = {
+            "filename": filename,
+            "path": file_path,
+            "csrfmiddlewaretoken": csrftoken
+        }
+        server_response = opener.open(ROOT_ADDRESS + "get/", params).read()
+        errors = ["File not found!","Must be logged in to download files!"]
+        if server_response not in errors:
+            try:
+                os.makedirs(filepath)
+            except:
+                pass
+            cfile = open(full_path, "wb+")
+            cfile.write(file_page)
+            cfile.close()
+            return "File at %s downloaded" % full_path
+        else:
+            return server_response
 
 def get_users():
     user_page = opener.open(ROOT_ADDRESS + "users/").read()
@@ -181,3 +198,14 @@ def get_activity(username):
     }
     activity_page = opener.open(ROOT_ADDRESS + "activity/", params).read()
     return "Activity for %s: " % username + "\n" + activity_page 
+
+if __name__ == '__main__':
+    print login("test0","password")
+    print add_file("testfolder/testign/Pig.jpg")
+    print add_file("testfolder/testign/targaryenDragon.png")
+    print add_file("testfolder/testign/LinearCombo.png")
+    print add_file("testfolder/testign/testfile2.txt")
+    print get_file("testfolder/testign/Pigasda.jpg")
+    print get_users()
+    print get_activity("test0")
+    print str(datetime.now())
