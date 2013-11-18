@@ -24,5 +24,7 @@ urlpatterns = patterns('',
     url(r'^add/', views.add_file),
     url(r'^users/', views.get_users),
     url(r'^get/', views.get_file),
-    url(r'^activity/', views.get_activity)
+    url(r'^delete/', views.delete_file),
+    url(r'^activity/', views.get_activity),
+    url(r'^sync/', views.get_sync_log)
 )
