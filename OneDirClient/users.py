@@ -188,9 +188,9 @@ def get_file(file_path):
         errors = ["File not found!","Must be logged in to download files!"]
         if server_response not in errors:
             try:
-                os.makedirs(LOCAL_FOLDER + file_path)
-            except:
                 os.makedirs(LOCAL_FOLDER + file_path[1:])
+            except:
+                pass
             try:
                 cfile = open(LOCAL_FOLDER + full_path, "wb+")
             except:
@@ -213,10 +213,13 @@ def delete_file(path, key):
 
 def delete_local(path):
     path = LOCAL_FOLDER + path
-    if (path[len(path)-1]=="/"):
-        shutil.rmtree(path)
-    else:
-        os.remove(path)
+    try:
+        if (path[len(path)-1]=="/"):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+    except:
+        pass
     return "File at %s deleted locally" % path
 
 def get_activity(username):

@@ -3,12 +3,27 @@
 <head>
     <title>{% block title %}{% endblock %}</title>
 </head>
-<body>
-    <h1>OneDir</h1>
-    {% block content %}{% endblock %}
-    {% block footer %}
-    <hr>
-    <p>Thanks for using OneDir.</p>
+<body style="margin: 0px">
+
+    <div style="padding-top: 100px;">
+    	<span style="position: relative; left: 80%; bottom: 0px; font-size: 24px;">
+    		OneDir
+    	</span>
+    </div>
+    <hr style="margin-top: 0px">
+
+    {% block menu %}
     {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    	<div style="padding-bottom: 100px; position: absolute; bottom: 0px; left: 0px; right: 0px">    
+    		<hr style="margin-bottom: 0px">
+    		<center>Thanks for using OneDir.</center>
+    	</div>
+    {% endblock %}
+
 </body>
 </html>

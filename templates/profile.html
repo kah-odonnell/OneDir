@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}OneDir{% endblock %}
+
+{% if is_admin %}
+
+{% endif %}
+
+{% block content %}
+	{% for file in files %}
+		<div>{{ file }}</div>
+	{% endfor %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

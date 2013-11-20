@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models.fields.files import FieldFile
-from helpers import getClientIp, userAlreadyExists, getDateTime
+from helpers import getClientIp, userAlreadyExists, getDateTime, getFiles
 from onedir.models import UserAction
 from django.db.models import Q
 
@@ -192,9 +192,27 @@ Our client would not want to call these unless finding the CSRF token.
 """
 def login_form(request):
 	if request.user.is_authenticated():
-		return render(request, "login.html", {'is_authenticated': True, 'username': request.user.username})
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
 	else: 
-		return render(request, "login.html", {'is_authenticated': False})
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
 
 def register_form(request):
 	return render(request, "register.html")
+
+def myprofile(request):
+	if request.POST.get('username') and request.POST.get('password'):
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate(username=username, password=password)
+		if user is not None and user.is_active:
+			login(request, user)
+			if user.is_superuser:
+				files = getFiles(user.id)
+				return render(request, "profile.html", {'is_admin': True, 'files': files})
+			else:
+				return render(request, "profile.html", {'is_admin': False})
+		else:
+			return render(request, "login.html", {'login_failed': True, 'is_authenticated': False})
+
+	else: 
+		return HttpResponse('POST with username and password to login')

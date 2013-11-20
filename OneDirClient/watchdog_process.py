@@ -59,7 +59,7 @@ def sync():
     local_log = getLocalLog()
     for key in server_log:
         if key in local_log:
-            local_log.get(key)
+            pass
         else:
             now = datetime.now()
             path = server_log.get(key)[1]
@@ -75,8 +75,9 @@ def sync():
 
 def log(output):
     fileLogLoc = "fileMonitorLog.txt"
-    with open(fileLogLoc, "a") as myfile:
-        myfile.write(output)
+    if (output[0]=="{"):
+        with open(fileLogLoc, "a") as myfile:
+            myfile.write(output)
 
 def getRelativePath(parent):
     prefix_len = len(LOCAL_FOLDER) - 1
@@ -90,6 +91,7 @@ def monitorFileModifications(previousSnap, currentSnap):
             ref_stat_info = previousSnap.stat_info(path)
             if stat_info.st_mtime != ref_stat_info.st_mtime and os.path.isfile(path):
                 #Counting file modifications like a regular add
+                
                 rel_path = getRelativePath(path)
                 now = datetime.now()
                 key = str(now)+str(item)
@@ -98,6 +100,7 @@ def monitorFileModifications(previousSnap, currentSnap):
                 log(json.dumps(log_entry))
                 print add_file(rel_path, key)
                 print 'This file was modified: ' + path
+                
         item = item + 1
 
 def fileMonitor(n):
@@ -106,7 +109,7 @@ def fileMonitor(n):
     while True:
         dirSnap = DirectorySnapshot(path, True)
         dirSnapDiff = DirectorySnapshotDiff(previousSnap, dirSnap)
-
+        sync()
         if dirSnapDiff.dirs_created.__len__() is not 0:
             item = 0
             for parent in dirSnapDiff.dirs_created:
@@ -159,13 +162,59 @@ def fileMonitor(n):
                 print delete_file(rel_path, key)
             print 'File Deleted: ' + dirSnapDiff.files_deleted.__str__()
 
+        if dirSnapDiff.dirs_moved.__len__() is not 0:
+            item = 0
+            for parent in dirSnapDiff.dirs_moved:
+                original = parent[0]
+                new = parent[1]
+
+                now = datetime.now()
+                key = str(now)+str(item)
+                rel_path = getRelativePath(original) + "/"
+                log_items = ["delete", rel_path]
+                log_entry = {key: log_items}
+                log(json.dumps(log_entry))
+                item = item + 1
+                print delete_file(rel_path, key)
+
+                key = str(now)+str(item)
+                rel_path = getRelativePath(new) + "/"
+                log_items = ["add", rel_path]
+                log_entry = {key: log_items}
+                log(json.dumps(log_entry))
+                item = item + 1
+                print add_file(rel_path, key)
+
+        if dirSnapDiff.files_moved.__len__() is not 0:
+            for parent in dirSnapDiff._files_moved:
+                original = parent[0]
+                new = parent[1]
+
+                now = datetime.now()
+                key = str(now)+str(item)
+                rel_path = getRelativePath(original)
+                log_items = ["delete", rel_path]
+                log_entry = {key: log_items}
+                log(json.dumps(log_entry))
+                item = item + 1
+                print delete_file(rel_path, key)
+
+                key = str(now)+str(item)
+                rel_path = getRelativePath(new)
+                log_items = ["add", rel_path]
+                log_entry = {key: log_items}
+                log(json.dumps(log_entry))
+                item = item + 1
+                print add_file(rel_path, key)
+
+            print 'File Moved: ' + dirSnapDiff.files_moved.__str__()
+
         monitorFileModifications(previousSnap, dirSnap)
         previousSnap = DirectorySnapshot(path, True)
         time.sleep(n)
-        sync()
 
 if __name__ == '__main__':
-    print login("test10","password")
+    print register("test14","password","password")
     print getLocalLog()
     print getServerLog()
     t = Thread(target=fileMonitor, args=(1,))
