@@ -2,13 +2,14 @@
 import os
 import json
 import shutil
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models.fields.files import FieldFile
-from helpers import getClientIp, userAlreadyExists, getDateTime, getFiles
+from helpers import getClientIp, userAlreadyExists, getFileSize, getDateTime, getFiles, getHistory, isAdmin
 from onedir.models import UserAction
 from django.db.models import Q
 
@@ -177,9 +178,8 @@ def get_sync_log(request):
 		username = request.user.username
 		time_of_last_sync = request.POST['timestamp']
 		user_activity = {}
-		for log in UserAction.objects.filter(
-			user__username=username,  
-		).exclude(ip=getClientIp(request)):
+		for log in UserAction.objects.filter(user__username=username):
+			#.exclude(ip=getClientIp(request)):
 			user_array = [log.action, log.path]
 			user_activity[log.key] = user_array
 		json_response = json.dumps(user_activity)
@@ -199,20 +199,142 @@ def login_form(request):
 def register_form(request):
 	return render(request, "register.html")
 
-def myprofile(request):
-	if request.POST.get('username') and request.POST.get('password'):
+def logout_browser(request):
+	if request.user.is_authenticated():
+		logout(request)
+	return HttpResponseRedirect('/')
+
+def myprofile(request, username=""):
+	if request.method == 'POST':
 		username = request.POST['username']
 		password = request.POST['password']
 		user = authenticate(username=username, password=password)
 		if user is not None and user.is_active:
 			login(request, user)
-			if user.is_superuser:
-				files = getFiles(user.id)
-				return render(request, "profile.html", {'is_admin': True, 'files': files})
-			else:
-				return render(request, "profile.html", {'is_admin': False})
-		else:
+		return HttpResponseRedirect(reverse("onedir.views.myprofile"))
+
+	if request.method == 'GET':
+		user = request.user
+		if user.id is None:
 			return render(request, "login.html", {'login_failed': True, 'is_authenticated': False})
 
-	else: 
-		return HttpResponse('POST with username and password to login')
+	if user.is_superuser:
+		try:
+			user2 = User.objects.get(username=username)
+			return render(request, "profile.html", {
+				'is_admin': True, 
+				'files': getFiles(user2.id), 
+				'username': user.username, 
+				'viewing': True,
+				'user2': user2.username,
+				'history': getHistory(user2.id)
+			})
+		except:
+			return render(request, "profile.html", {
+				'is_admin': True, 
+				'files': getFiles(user.id), 
+				'username': user.username,
+				'history': getHistory(user.id)
+			})
+	else:
+		return render(request, "profile.html", {
+			'is_admin': False, 
+			'files': getFiles(user.id), 
+			'username': user.username,
+			'history': getHistory(user.id)
+		})
+
+def mypassword(request):
+	if not request.user.is_authenticated:
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
+	if request.method == 'POST':
+		user = request.user
+		if request.POST['password'] == request.POST['confirmpw']:
+			user.set_password(request.POST['password'])
+			user.save()
+			return render(request, "profile.html", {
+				'is_admin': isAdmin(user.id), 
+				'files': getFiles(user.id), 
+				'username': user.username,
+				'history': getHistory(user.id)
+			})
+		else:
+			return render(request, "password.html", {
+				'failed': True,
+				'username': user.username,
+				'is_admin': isAdmin(user.id),
+			})
+	if request.method == 'GET':
+		user = request.user
+		return render(request, "password.html", {
+			'username': user.username,
+			'is_admin': isAdmin(user.id), 
+		})
+
+def theirpassword(request, username=""):
+	print "this is called"
+	if not request.user.is_authenticated:
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
+	if not request.user.is_superuser:
+		return HttpResponseRedirect('/password/')
+	if request.method == 'POST':
+		if request.POST['password'] == request.POST['confirmpw']:
+			user = User.objects.get(username=request.POST['username'])
+			user.set_password(request.POST['password'])
+			user.save()
+			user = request.user
+			return render(request, "profile.html", {
+				'is_admin': isAdmin(user.id), 
+				'files': getFiles(user.id), 
+				'username': user.username,
+				'history': getHistory(user.id)
+			})
+		else:
+			return render(request, "password.html", {
+				'failed': True,
+				'username': user.username,
+				'is_admin': isAdmin(user.id),
+				'username2': username,
+				'viewing': True,
+			})
+	if request.method == 'GET':
+		user = request.user
+		return render(request, "password.html", {
+			'username2': username,
+			'viewing': True,
+			'username': user.username,
+			'is_admin': isAdmin(user.id), 
+		})
+
+def userlist(request):
+	if not request.user.is_authenticated:
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
+	if not request.user.is_superuser:
+		return HttpResponseRedirect('/myprofile/')
+	userlist = []
+	for user in User.objects.all():
+		userinfo = []
+		userinfo.append(user.username)
+		userinfo.append(getFileSize(user.id))
+		userlist.append(userinfo)
+	user = request.user
+	return render(request, "userlist.html", {
+		'username': user.username,
+		'is_admin': isAdmin(user.id),
+		'users': userlist,
+	})
+
+def systemlist(request):
+	if not request.user.is_authenticated:
+		return render(request, "login.html", {'login_failed': False, 'is_authenticated': False})
+	if not request.user.is_superuser:
+		return HttpResponseRedirect('/myprofile/')
+	system_size = getFileSize("")
+	system_files = getFiles("")
+	user = request.user
+	return render(request, "system.html", {
+		'username': user.username,
+		'is_admin': isAdmin(user.id),
+		'files': system_files,
+		'size': system_size
+	})

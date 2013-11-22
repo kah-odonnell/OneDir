@@ -2,10 +2,30 @@
 <html lang="en">
 <head>
     <title>{% block title %}{% endblock %}</title>
+    <style>
+    ul {
+        padding: 0px;
+    }
+    li.navbar {
+        float: right; 
+        font-size: 24px;
+        text-align: center;
+    }
+    a.link {
+        display: block;
+        width: 150px;
+    }
+    div.header {
+        background-image:url('http://blogs.sacurrent.com/wp-content/uploads/2013/08/one-direction-5.jpg');
+        background-repeat:no-repeat;
+        background-position:10px -75px;
+        background-color: #CFCFCF; 
+    }
+    </style>
 </head>
 <body style="margin: 0px">
 
-    <div style="padding-top: 100px;">
+    <div class="header" style="padding-top: 100px;">
     	<span style="position: relative; left: 80%; bottom: 0px; font-size: 24px;">
     		OneDir
     	</span>
@@ -15,8 +35,10 @@
     {% block menu %}
     {% endblock %}
 
+    <div style="margin: 0 auto; width: 80%;">
     {% block content %}
     {% endblock %}
+    </div>
 
     {% block footer %}
     	<div style="padding-bottom: 100px; position: absolute; bottom: 0px; left: 0px; right: 0px">    
@@ -24,6 +46,7 @@
     		<center>Thanks for using OneDir.</center>
     	</div>
     {% endblock %}
+    <div style="height"
 
 </body>
 </html>

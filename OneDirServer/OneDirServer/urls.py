@@ -27,5 +27,11 @@ urlpatterns = patterns('',
     url(r'^delete/', views.delete_file),
     url(r'^activity/', views.get_activity),
     url(r'^sync/', views.get_sync_log),
-    url(r'^myprofile/', views.myprofile)
+    url(r'^myprofile/(?P<username>.*)', views.myprofile),
+    url(r'^myprofile/', views.myprofile),
+    url(r'^logoutbrowser/',views.logout_browser),
+    url(r'^password/$', views.mypassword),
+    url(r'^password/(?P<username>.*)', views.theirpassword),
+    url(r'^userlist/', views.userlist),
+    url(r'^system/', views.systemlist),
 )

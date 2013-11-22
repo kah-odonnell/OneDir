@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from onedir.models import UserAction
 from datetime import datetime
 import os
 
@@ -27,17 +28,59 @@ def getDateTime(key):
 		timestamp = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
 		return timestamp
 
+def getHistory(theid):
+	history = []
+	for log in UserAction.objects.filter(user=theid):
+		user_array = [log.action, log.path, log.timestamp]
+		history.append(user_array)
+	return history
+
 def getFiles(id):
 	file_list = []
 	directory = "../uploads/" + str(id)
-	print directory
-	os.walk(directory, topdown=False)
-	for root, dirs, files in os.walk(directory, topdown=True):
-		print str(root) + "|" + str(dirs) + "|" + str(files)
-		for name in files:
-			print name
-			file_list.append(name)
-		for name in dirs:
-			print name
-			file_list.append(name + "/")
+	file_list = [getDirectoryStructure(directory)]
+	thelist = []
+	return printStructure(file_list, 0, thelist)
+
+def getDirectoryStructure(path):
+	file_list = []
+	i = 0
+	try:
+		for filename in os.listdir(path):
+			file_list.append(filename)
+			x = getDirectoryStructure(path + "/" + filename)
+			if x:
+				file_list.append(x)
+	except:
+		pass
 	return file_list
+
+def getFileSize(userid):
+    total_size = 0
+    start_path = "../uploads/" + str(userid)
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+def printStructure(file_list, depth, thelist):
+	whitespace = ""
+	for i in range(0, depth):
+		whitespace = whitespace + "     "
+	for item in file_list:
+		if isinstance(item, list):
+			printStructure(item, depth + 1, thelist)
+		else:
+			thelist.append(whitespace + item) 
+	return thelist
+
+def isAdmin(id):
+	user = User.objects.get(id=id)
+	if user.is_superuser:
+		return True
+	else:
+		return False
+
+
+

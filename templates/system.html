@@ -1,0 +1,15 @@
+{% extends "menu.html" %}
+
+{% block title %}OneDir{% endblock %}
+
+{% block content %}
+	<div style="font-size: 24px">
+		System Files ({{size}} bytes)
+	</div><br>
+	{% for file in files %}
+		<div style="white-space: pre">{{ file }}</div>
+	{% endfor %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

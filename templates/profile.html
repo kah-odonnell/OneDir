@@ -1,15 +1,40 @@
-{% extends "base.html" %}
+{% extends "menu.html" %}
 
 {% block title %}OneDir{% endblock %}
 
-{% if is_admin %}
-
-{% endif %}
-
 {% block content %}
+	<div style="font-size: 24px">
+		{% if viewing %}
+			{{user2}}'s Files
+		{% else %}
+			{{username}}'s Files
+		{% endif %}
+	</div><br>
 	{% for file in files %}
-		<div>{{ file }}</div>
+		<div style="white-space: pre">{{ file }}</div>
 	{% endfor %}
+	<br>
+	<div style="font-size: 24px">
+		{% if viewing %}
+			{{user2}}'s History
+		{% else %}
+			{{username}}'s History
+		{% endif %}
+	</div><br>
+	<table style="width: 100%; text-align: left">
+		<tr>
+			<th>Activity</th>
+			<th>Location</th>
+			<th>Time</th>
+		</tr>
+	{% for log in history %}
+		<tr>
+			<td>{{ log.0 }}</td>
+			<td>{{ log.1 }}</td>
+			<td>{{ log.2 }}</td>
+		</tr>
+	{% endfor %}
+	</table>
 {% endblock %}
 
 {% block footer %}

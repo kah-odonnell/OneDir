@@ -1,0 +1,20 @@
+{% extends "menu.html" %}
+
+{% block title %}OneDir{% endblock %}
+
+{% block content %}
+	{% for user in users %}
+		<div style="float: left; width: 200px;">{{user.0}}</div>
+		<span style="float: left; width: 200px;">
+			<a href="/password/{{user.0}}">Edit Password</a>
+		</span>
+		<span style="float: left; width: 200px;">
+			<a href="/myprofile/{{user.0}}">View Files</a>
+		</span>
+		<div style="float: left; width: 200px;">{{user.1}} bytes</div>
+		<br>
+	{% endfor %}
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

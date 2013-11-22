@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block menu %}
+<ul style="list-style-type: none; margin: 0 auto; width: 80%; height: 32px;">
+	<li class="navbar" style="float: left;"><span>{{ username }}</span></li>
+	<li class="navbar"><a href="/logoutbrowser/" class="link" style="float: right">Log Out</a></li>
+	<li class="navbar"><a href="/password/" class="link">Edit Password</a></li>
+	<li class="navbar"><a href="/myprofile/" class="link">View Files</a></li>
+</ul>
+<hr>
+{% if is_admin %}
+<ul style="list-style-type: none; margin: 0 auto; width: 80%; height: 32px;">
+	<li class="navbar" style="float: left;"><span>Administrate</span></li>
+	<li class="navbar"><a href="/userlist/" class="link" style="float: right">View Users</a></li>
+	<li class="navbar"><a href="/system/" class="link">System Files</a></li>
+</ul>
+<hr>
+{% endif %}
+{% endblock %}
