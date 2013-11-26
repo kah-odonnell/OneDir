@@ -118,10 +118,13 @@ def get_file(request):
 		path = "../uploads/" + str(request.user.id) + "/" + request.POST['path']
 		full_path = path + filename
 		if os.path.exists(full_path):
-			getfile = open(full_path, "rb")
-			full_file = getfile.read()
-			getfile.close()
-			return HttpResponse(full_file)
+			try:
+				getfile = open(full_path, "rb")
+				full_file = getfile.read()
+				getfile.close()
+				return HttpResponse(full_file)
+			except:
+				pass
 		else:
 			return HttpResponse("File not found!")
 	return HttpResponse("Failed to download anything!")
@@ -338,3 +341,28 @@ def systemlist(request):
 		'files': system_files,
 		'size': system_size
 	})
+
+def ban(request, username=""):
+	if not request.user.is_superuser:
+		return HttpResponseRedirect('/myprofile/')
+	try:
+		x = User.objects.get(username=username)
+		x.is_active = False
+		x.save()
+		url = '/myprofile/' + x.username
+		return HttpResponseRedirect(url)
+	except:
+		return HttpResponse('/myprofile/')
+
+def destroy(request, username=""):
+	if not request.user.is_superuser:
+		return HttpResponseRedirect('/myprofile/')
+	try:
+		x = User.objects.get(username=username)
+		path = "../uploads/" + str(x.id) + "/"
+		shutil.rmtree(path)
+		url = "/myprofile/" + x.username + "/"
+		return HttpResponseRedirect(url)
+	except:
+		pass
+	return HttpResponseRedirect('/myprofile/')

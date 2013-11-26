@@ -103,118 +103,140 @@ def monitorFileModifications(previousSnap, currentSnap):
                 
         item = item + 1
 
+monitoring = True
+
+def toggleWatchdog():
+    global monitoring
+    if monitoring:
+        monitoring = False
+    else:
+        monitoring = True
+
+def getMonitoring():
+    global monitoring
+    temp = monitoring
+    return temp
+
 def fileMonitor(n):
+    global monitoring
     path = LOCAL_FOLDER
     previousSnap = DirectorySnapshot(path, True)
     while True:
-        dirSnap = DirectorySnapshot(path, True)
-        dirSnapDiff = DirectorySnapshotDiff(previousSnap, dirSnap)
-        sync()
-        if dirSnapDiff.dirs_created.__len__() is not 0:
-            item = 0
-            for parent in dirSnapDiff.dirs_created:
-                now = datetime.now()
-                rel_path = getRelativePath(parent) + "/"
-                key = str(now)+str(item)
-                log_items = ["add", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print add_file(rel_path, key)
-            print 'Directory Created: ' + dirSnapDiff.dirs_created.__str__()
+        if monitoring:
+            dirSnap = DirectorySnapshot(path, True)
+            sync()
+            dirSnapDiff = DirectorySnapshotDiff(previousSnap, dirSnap)
+            if dirSnapDiff.dirs_created.__len__() is not 0:
+                item = 0
+                for parent in dirSnapDiff.dirs_created:
+                    now = datetime.now()
+                    rel_path = getRelativePath(parent) + "/"
+                    key = str(now)+str(item)
+                    log_items = ["add", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print add_file(rel_path, key)
+                print 'Directory Created: ' + dirSnapDiff.dirs_created.__str__()
 
-        if dirSnapDiff.dirs_deleted.__len__() is not 0:
-            item = 0
-            for parent in dirSnapDiff.dirs_deleted:
-                now = datetime.now()
-                key = str(now)+str(item)
-                rel_path = getRelativePath(parent) + "/"
-                log_items = ["delete", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print delete_file(rel_path, key)
-            print 'Directory Deleted: ' + dirSnapDiff.dirs_deleted.__str__()
+            if dirSnapDiff.dirs_deleted.__len__() is not 0:
+                item = 0
+                for parent in dirSnapDiff.dirs_deleted:
+                    now = datetime.now()
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(parent) + "/"
+                    log_items = ["delete", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print delete_file(rel_path, key)
+                print 'Directory Deleted: ' + dirSnapDiff.dirs_deleted.__str__()
 
-        if dirSnapDiff.files_created.__len__() is not 0:
-            item = 0
-            for parent in dirSnapDiff.files_created:
-                now = datetime.now()
-                key = str(now)+str(item)
-                rel_path = getRelativePath(parent)
-                log_items = ["add", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print add_file(rel_path, key)
-            print 'File Created: ' + dirSnapDiff.files_created.__str__()
+            if dirSnapDiff.files_created.__len__() is not 0:
+                item = 0
+                for parent in dirSnapDiff.files_created:
+                    now = datetime.now()
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(parent)
+                    log_items = ["add", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print add_file(rel_path, key)
+                print 'File Created: ' + dirSnapDiff.files_created.__str__()
 
-        if dirSnapDiff.files_deleted.__len__() is not 0:
-            item = 0
-            for parent in dirSnapDiff.files_deleted:
-                now = datetime.now()
-                key = str(now)+str(item)
-                rel_path = getRelativePath(parent)
-                log_items = ["delete", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print delete_file(rel_path, key)
-            print 'File Deleted: ' + dirSnapDiff.files_deleted.__str__()
+            if dirSnapDiff.files_deleted.__len__() is not 0:
+                item = 0
+                for parent in dirSnapDiff.files_deleted:
+                    now = datetime.now()
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(parent)
+                    log_items = ["delete", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print delete_file(rel_path, key)
+                print 'File Deleted: ' + dirSnapDiff.files_deleted.__str__()
 
-        if dirSnapDiff.dirs_moved.__len__() is not 0:
-            item = 0
-            for parent in dirSnapDiff.dirs_moved:
-                original = parent[0]
-                new = parent[1]
+            if dirSnapDiff.dirs_moved.__len__() is not 0:
+                item = 0
+                for parent in dirSnapDiff.dirs_moved:
+                    original = parent[0]
+                    new = parent[1]
 
-                now = datetime.now()
-                key = str(now)+str(item)
-                rel_path = getRelativePath(original) + "/"
-                log_items = ["delete", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print delete_file(rel_path, key)
+                    now = datetime.now()
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(original) + "/"
+                    log_items = ["delete", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print delete_file(rel_path, key)
 
-                key = str(now)+str(item)
-                rel_path = getRelativePath(new) + "/"
-                log_items = ["add", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print add_file(rel_path, key)
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(new) + "/"
+                    log_items = ["add", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print add_file(rel_path, key)
 
-        if dirSnapDiff.files_moved.__len__() is not 0:
-            for parent in dirSnapDiff._files_moved:
-                original = parent[0]
-                new = parent[1]
+            if dirSnapDiff.files_moved.__len__() is not 0:
+                for parent in dirSnapDiff._files_moved:
+                    original = parent[0]
+                    new = parent[1]
 
-                now = datetime.now()
-                key = str(now)+str(item)
-                rel_path = getRelativePath(original)
-                log_items = ["delete", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print delete_file(rel_path, key)
+                    now = datetime.now()
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(original)
+                    log_items = ["delete", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print delete_file(rel_path, key)
 
-                key = str(now)+str(item)
-                rel_path = getRelativePath(new)
-                log_items = ["add", rel_path]
-                log_entry = {key: log_items}
-                log(json.dumps(log_entry))
-                item = item + 1
-                print add_file(rel_path, key)
+                    key = str(now)+str(item)
+                    rel_path = getRelativePath(new)
+                    log_items = ["add", rel_path]
+                    log_entry = {key: log_items}
+                    log(json.dumps(log_entry))
+                    item = item + 1
+                    print add_file(rel_path, key)
 
-            print 'File Moved: ' + dirSnapDiff.files_moved.__str__()
+                print 'File Moved: ' + dirSnapDiff.files_moved.__str__()
 
-        monitorFileModifications(previousSnap, dirSnap)
-        previousSnap = DirectorySnapshot(path, True)
+            monitorFileModifications(previousSnap, dirSnap)
+            previousSnap = DirectorySnapshot(path, True)
         time.sleep(n)
 
+def startWatchdog():
+    print getLocalLog()
+    print getServerLog()
+    t = Thread(target=fileMonitor, args=(1,))
+    t.start()
+
 if __name__ == '__main__':
-    print register("test14","password","password")
+    print login("test29","password")
     print getLocalLog()
     print getServerLog()
     t = Thread(target=fileMonitor, args=(1,))

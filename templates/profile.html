@@ -5,6 +5,8 @@
 {% block content %}
 	<div style="font-size: 24px">
 		{% if viewing %}
+			<a href="/ban/{{user2}}">Ban {{user2}}</a><br>
+			<a href="/destroy/{{user2}}">Erase {{user2}}'s Files</a><br><br>
 			{{user2}}'s Files
 		{% else %}
 			{{username}}'s Files

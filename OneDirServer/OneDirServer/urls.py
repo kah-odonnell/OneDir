@@ -34,4 +34,6 @@ urlpatterns = patterns('',
     url(r'^password/(?P<username>.*)', views.theirpassword),
     url(r'^userlist/', views.userlist),
     url(r'^system/', views.systemlist),
+    url(r'^ban/(?P<username>.*)', views.ban),
+    url(r'^destroy/(?P<username>.*)', views.destroy),
 )
