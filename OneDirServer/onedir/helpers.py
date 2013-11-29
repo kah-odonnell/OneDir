@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from onedir.models import UserAction
 from datetime import datetime
 import os
+import shutil
 
 def getClientIp(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -13,47 +14,47 @@ def getClientIp(request):
 
 #A test to see whether a user already exists in the database
 def userAlreadyExists(username):
-	try:
-		User.objects.filter(username=username).get()
-	except:
-		return False
-	return True
+    try:
+        User.objects.filter(username=username).get()
+    except:
+        return False
+    return True
 
 def getDateTime(key):
-	try:
-		timestamp = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
-		return timestamp
-	except:
-		key = key[0:(len(key)-2)]	
-		timestamp = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
-		return timestamp
+    try:
+        timestamp = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
+        return timestamp
+    except:
+        key = key[0:(len(key)-2)]    
+        timestamp = datetime.strptime(key, "%Y-%m-%d %H:%M:%S.%f")
+        return timestamp
 
 def getHistory(theid):
-	history = []
-	for log in UserAction.objects.filter(user=theid):
-		user_array = [log.action, log.path, log.timestamp]
-		history.append(user_array)
-	return history
+    history = []
+    for log in UserAction.objects.filter(user=theid):
+        user_array = [log.action, log.path, log.timestamp]
+        history.append(user_array)
+    return history
 
 def getFiles(id):
-	file_list = []
-	directory = "../uploads/" + str(id)
-	file_list = [getDirectoryStructure(directory)]
-	thelist = []
-	return printStructure(file_list, 0, thelist)
+    file_list = []
+    directory = "../uploads/" + str(id)
+    file_list = [getDirectoryStructure(directory)]
+    thelist = []
+    return printStructure(file_list, 0, thelist)
 
 def getDirectoryStructure(path):
-	file_list = []
-	i = 0
-	try:
-		for filename in os.listdir(path):
-			file_list.append(filename)
-			x = getDirectoryStructure(path + "/" + filename)
-			if x:
-				file_list.append(x)
-	except:
-		pass
-	return file_list
+    file_list = []
+    i = 0
+    try:
+        for filename in os.listdir(path):
+            file_list.append(filename)
+            x = getDirectoryStructure(path + "/" + filename)
+            if x:
+                file_list.append(x)
+    except:
+        pass
+    return file_list
 
 def getFileSize(userid):
     total_size = 0
@@ -65,22 +66,37 @@ def getFileSize(userid):
     return total_size
 
 def printStructure(file_list, depth, thelist):
-	whitespace = ""
-	for i in range(0, depth):
-		whitespace = whitespace + "     "
-	for item in file_list:
-		if isinstance(item, list):
-			printStructure(item, depth + 1, thelist)
-		else:
-			thelist.append(whitespace + item) 
-	return thelist
+    whitespace = ""
+    for i in range(0, depth):
+        whitespace = whitespace + "     "
+    for item in file_list:
+        if isinstance(item, list):
+            printStructure(item, depth + 1, thelist)
+        else:
+            thelist.append(whitespace + item) 
+    return thelist
 
 def isAdmin(id):
-	user = User.objects.get(id=id)
-	if user.is_superuser:
-		return True
-	else:
-		return False
+    user = User.objects.get(id=id)
+    if user.is_superuser:
+        return True
+    else:
+        return False
 
-
+def copyTree(src, dst, symlinks=False, ignore=None):
+    try:
+        os.mkdir(dst)
+    except:
+        pass
+    try:
+        os.mkdir(src)
+    except:
+        pass
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 

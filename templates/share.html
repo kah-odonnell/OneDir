@@ -1,0 +1,15 @@
+{% extends "menu.html" %}
+
+{% block title %}OneDir{% endblock %}
+
+{% block content %}
+    Share your files with another user.
+    <form action="/share/" method="post">
+        {% csrf_token %}
+        <input type="text" name="username"><br>
+        <input type="submit" value="Accept">
+    </form>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

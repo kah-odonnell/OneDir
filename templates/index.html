@@ -1,18 +1,18 @@
 <html>
-	<head>
-		
-	</head>
-	<title>OneDir</title>
-	<body style="margin: 0px">
-		{% if is_authenticated  %}
-    		<h1>{{ username }}</h1>
-    	{% else %}
-    		<form action="/login/" method="post">
-    			{% csrf_token %}
-    			<input type="text" name="username">
-    			<input type="password" name="password">
-    			<input type="submit" value="login">
-    		</form>
-		{% endif %}
-	</body>
+    <head>
+        
+    </head>
+    <title>OneDir</title>
+    <body style="margin: 0px">
+        {% if is_authenticated  %}
+            <h1>{{ username }}</h1>
+        {% else %}
+            <form action="/login/" method="post">
+                {% csrf_token %}
+                <input type="text" name="username">
+                <input type="password" name="password">
+                <input type="submit" value="login">
+            </form>
+        {% endif %}
+    </body>
 </html>
