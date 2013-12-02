@@ -69,7 +69,7 @@ def register_user(request):
         return HttpResponse("POST with username, password, and confirmpw to register")
 
 def add_file(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated() or not request.user.is_active:
         return HttpResponse("Must be logged in to upload files!")
     if request.method == 'POST':
         path = "../uploads/" + str(request.user.id) + "/" + request.POST['path']

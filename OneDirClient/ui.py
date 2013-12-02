@@ -20,28 +20,6 @@ def resetOnedir():
         os.mkdir(LOCAL_FOLDER)
     open('fileMonitorLog.txt', "w").close()
 
-def saveLogin(username, password):
-    open('onedirUserFile.txt',"w").close()
-    userFile = open('onedirUserFile.txt', 'w')
-    userFile.write(username+'\n')
-    userFile.write(password)
-
-
-if(sys.argv[1] == 'boot'):
-    resetOnedir()
-    if os.path.isfile('ondirUserFile.txt'):
-        userFile = open('ondirUserFile.txt')
-        try:
-            username = userFile.readline(0)
-            password = userFile.readLine(1)
-            users.login(username, password)
-            #Method to upload all user data.
-            #Method to start watchdog
-        except:
-            pass
-    else:
-        pass
-
 if(sys.argv[1] == 'ui'):
     print home
     while True:
@@ -63,7 +41,6 @@ if(sys.argv[1] == 'ui'):
             if response.__contains__('successfully'):
                 print response
                 resetOnedir()
-                saveLogin(username, password)
                 print 'You can now begin using ~/onedir'
             else:
                 print response
@@ -77,7 +54,6 @@ if(sys.argv[1] == 'ui'):
             if response.__contains__('Logged in as'):
                 resetOnedir()
                 open('fileMonitorLog.txt', 'w').close()
-                saveLogin(username, password)
                 print 'You can now begin using /onedir/'
                 watchdog_process.startWatchdog()
         if(userInput == 3):
